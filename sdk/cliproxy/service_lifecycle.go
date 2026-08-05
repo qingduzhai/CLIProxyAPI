@@ -11,6 +11,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/home"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/redisqueue"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
+	internalusage "github.com/router-for-me/CLIProxyAPI/v7/internal/usage"
 	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
@@ -54,6 +55,7 @@ func (s *Service) Run(ctx context.Context) error {
 	if homeEnabled {
 		forceHomeRuntimeConfig(s.cfg)
 		redisqueue.SetUsageStatisticsEnabled(true)
+		internalusage.SetStatisticsEnabled(true)
 	}
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)

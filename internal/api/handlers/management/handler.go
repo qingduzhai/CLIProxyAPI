@@ -18,6 +18,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginstore"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/usage"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 	log "github.com/sirupsen/logrus"
@@ -60,6 +61,7 @@ type Handler struct {
 	pluginStoreHTTPClient   pluginstore.HTTPDoer
 	pluginReleaseCacheMu    sync.Mutex
 	pluginReleaseCache      map[string]pluginReleaseCacheEntry
+	usageStats              *usage.RequestStatistics
 }
 
 type configReloadSnapshot struct {
@@ -78,6 +80,7 @@ func NewHandler(cfg *config.Config, configFilePath string, manager *coreauth.Man
 		failedAttempts:      make(map[string]*attemptInfo),
 		authManager:         manager,
 		tokenStore:          sdkAuth.GetTokenStore(),
+		usageStats:          usage.GetRequestStatistics(),
 		allowRemoteOverride: envSecret != "",
 		envSecret:           envSecret,
 	}
@@ -147,6 +150,16 @@ func (h *Handler) SetPluginHost(host *pluginhost.Host) {
 	}
 	h.mu.Lock()
 	h.pluginHost = host
+	h.mu.Unlock()
+}
+
+// SetUsageStatistics allows replacing the usage statistics reference.
+func (h *Handler) SetUsageStatistics(stats *usage.RequestStatistics) {
+	if h == nil {
+		return
+	}
+	h.mu.Lock()
+	h.usageStats = stats
 	h.mu.Unlock()
 }
 
